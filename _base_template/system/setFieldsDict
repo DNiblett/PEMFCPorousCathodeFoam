@@ -1,0 +1,31 @@
+FoamFile { version 2.0; format ascii; class dictionary; object setFieldsDict; }
+defaultFieldValues
+(
+    volScalarFieldValue porosity 0.999999
+    volScalarFieldValue oxygenDiffusivityMultiplier 1
+    volScalarFieldValue kineticMultiplier 1
+    volScalarFieldValue contactResistance 0
+);
+regions
+(
+    boxToCell
+    {
+        type box;
+        box (-0.00379 -0.00399 0) (0.00379 0.00399 0.00028);
+        fieldValues
+        (
+            volScalarFieldValue porosity 0.78
+            volScalarFieldValue oxygenDiffusivityMultiplier 1
+            volScalarFieldValue kineticMultiplier 1
+            volScalarFieldValue contactResistance 0
+        );
+    }
+    boxToCell
+    {
+        type box;
+        // Current reaches the collector laterally beneath the open channel.
+        // This effective value is calibrated only for the Schneider case.
+        box (-0.001 -0.004 0) (0.001 0.004 0.00028);
+        fieldValues ( volScalarFieldValue contactResistance 5e-7 );
+    }
+);
