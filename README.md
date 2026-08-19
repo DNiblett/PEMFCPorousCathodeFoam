@@ -28,13 +28,6 @@ The solver calculates both `permeability` and `D_O2` tensors from the spatial
 free-flow/porous-medium formulation: channel cells use $\varepsilon\approx1$;
 GDL cells use their specified porosity.
 
-## Governing equations and conventions
-
-This section is the mathematical specification of the equations implemented
-in the two applications.  Displayed equations use GitHub's explicit `math`
-fences, rather than renderer-dependent dollar delimiters.
-All quantities are SI unless a plot axis states otherwise.
-
 ### 1. Flow in the channel and porous medium
 
 The flow solver is steady, incompressible and single phase:
