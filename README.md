@@ -124,7 +124,7 @@ implemented expression is
 ```math
 j = j_{0,c}M_k\frac{C_{\mathrm{O_2}}}{C_0}
 \left[\exp\!\left(\frac{V_{\mathrm{kin}}-\phi_c-E_{0,c}}{B_{c,f}}\right)
-\exp\!\left(\frac{V_{\mathrm{kin}}-\phi_c-E_{0,c}}{B_{c,b}}\right)\right],
+-\exp\!\left(\frac{V_{\mathrm{kin}}-\phi_c-E_{0,c}}{B_{c,b}}\right)\right],
 ```
 
 ```math
