@@ -1,0 +1,21 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volSymmTensorField;
+    location    "0";
+    object      permeability;
+}
+
+dimensions      [0 2 0 0 0 0 0];
+
+// (Kxx Kxy Kxz Kyy Kyz Kzz): x/y in-plane, z through-plane.
+internalField   uniform (1e-9 0 0 1e-9 0 1e-12);
+
+boundaryField
+{
+    ".*"
+    {
+        type zeroGradient;
+    }
+}

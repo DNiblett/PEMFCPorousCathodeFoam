@@ -1,0 +1,22 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      particlePlacementProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+vol_fraction_solids 0.2;        // Target volume fraction of solids
+particle_radius      5;     // Radius of each particle in (Grid Coordinates)
+domain_min        (0 0 0);  // Domain dimensions (min, max)
+domain_max	   (1 1 1); //domain max

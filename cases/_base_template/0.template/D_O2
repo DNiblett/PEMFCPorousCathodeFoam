@@ -1,0 +1,21 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volSymmTensorField;
+    location    "0";
+    object      D_O2;
+}
+
+dimensions      [0 2 -1 0 0 0 0];
+
+// (Dxx Dxy Dxz Dyy Dyz Dzz): x/y in-plane, z through-plane.
+internalField   uniform (2e-5 0 0 2e-5 0 1e-5);
+
+boundaryField
+{
+    ".*"
+    {
+        type zeroGradient;
+    }
+}
