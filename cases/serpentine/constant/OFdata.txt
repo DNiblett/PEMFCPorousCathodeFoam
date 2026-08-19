@@ -1,0 +1,17 @@
+ transformScale 1e-06;
+  xmin 10;
+  xmax 4990;
+  ymin     9;
+  ymax  6990;
+  zmin 35.014;
+  zmax 70.028;
+locInMeshx  2500;
+locInMeshy  3500;
+locInMeshz 35.014;
+resX 249;
+resY 349;
+resZ 1;
+LinearExpansionCoeff 20;
+cellCrossArea 1e-07;
+RS 2;
+RZ 2;

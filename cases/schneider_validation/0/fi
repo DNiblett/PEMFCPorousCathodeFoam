@@ -11,38 +11,26 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      p;
+    object      fi;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+//dimensions      [1 2 -3 0 0 -1 0];
+dimensions      [0 0 0 0 0 0 0];
+
+//#include "BCinput"
+#include "../constant/appliedCurrent"
 
 internalField   uniform 0;
 
 boundaryField
 {
 
-//walls
+
 ".*"
 {
-        type            zeroGradient;
-    }
-
-"channelInlet" //inlet
-{
-         type            zeroGradient;
-    }
-
-"channelOutlet" //inlet
-    {
-         type            fixedValue;
-        value           uniform 0;
-    }
-
-"emptyWalls"
-{
-         type            empty;
-    }
+type zeroGradient;
+}
 
 }
 

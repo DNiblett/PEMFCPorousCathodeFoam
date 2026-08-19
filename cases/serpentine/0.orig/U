@@ -9,54 +9,42 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      controlDict;
+    class       volVectorField;
+    location    "0";
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     interFlow;
+dimensions      [0 1 -1 0 0 0 0];
 
-startFrom       latestTime;
+internalField   uniform (0 0 0);
 
-startTime       latestTime;
+boundaryField
+{
 
-stopAt          endTime;
 
-endTime         1;
+//walls
+".*"
+{
+        type            noSlip;
+    }
 
-deltaT          1e-7;
-
-writeControl    adjustableRunTime;
-//writeControl    timeStep;
-
-writeInterval   5e-4;
-//writeInterval   10000;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  6;
-
-writeCompression uncompressed;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
-
-adjustTimeStep  yes;
-
-maxCo           0.25;
-
-maxAlphaCo      0.25;
-
-maxDeltaT       1;
+"channelInlet" //inlet
+{
+       type surfaceNormalFixedValue;
+       refValue uniform -2.1;
+    }
+    
+   
+"channelOutlet" //outlet
+    {
+        type            zeroGradient;
+    }
 
 
 
+
+}
 
 
 // ************************************************************************* //

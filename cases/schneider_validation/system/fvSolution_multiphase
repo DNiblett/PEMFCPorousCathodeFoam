@@ -1,0 +1,110 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "alpha.water.*"
+    {
+       // nAlphaCorr      1;
+        //nAlphaSubCycles 2;
+        //cAlpha          1;
+	interfaceMethod "isoAdvector";
+        isoFaceTol      1e-6;
+        surfCellTol     1e-6;
+        snapTol         0;	//1e-12;
+        nAlphaBounds    3;
+        clip            false;
+
+        nAlphaCorr      2;
+        nAlphaSubCycles 2;
+        cAlpha          1;
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
+
+
+    nAlphaCorr      1;
+    nAlphaSubCycles 1;
+    cAlpha          1;
+
+    reconstructionScheme plicRDF;
+    vof2IsoTol      1e-8;
+    surfCellTol     1e-6;
+    nAlphaBounds    3;
+    snapTol         0;//1e-12;
+    clip            false;//true;
+
+    }
+
+    "pcorr.*"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-08;
+        relTol          0;
+    }
+
+    p_rgh
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-07;
+        relTol          0.05;
+    }
+
+    p_rghFinal
+    {
+        $p_rgh;
+        tolerance       1e-07;
+        relTol          0;
+    }
+
+    U
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-07;
+        relTol          0;
+    }
+ UFinal
+    {
+        $U;
+        tolerance       1e-07;
+      //  relTol          0;
+    }
+}
+
+PIMPLE
+{
+     momentumPredictor yes; //no
+    nCorrectors     2; //3
+    nOuterCorrectors    1;
+    nNonOrthogonalCorrectors 1;
+    nAlphaCorr      1;
+    nAlphaSubCycles 1;
+    cAlpha          1;
+    pRefCell        0;
+    pRefValue       0;
+}
+
+
+// ************************************************************************* //

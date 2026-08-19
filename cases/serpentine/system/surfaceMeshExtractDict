@@ -1,0 +1,25 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2006                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+solidFieldIsosurface
+{
+    // Name of the field to extract the isosurface from
+    field solidField;
+
+    // Isosurface level to use (0.5 in this case)
+    isoValue 0.5;
+
+    // Surface format for output
+    surfaceFormat stl;
+
+    // Output file name
+    outputFile "solidFieldSurface.stl";
+}
+
+// ************************************************************************* //
+
