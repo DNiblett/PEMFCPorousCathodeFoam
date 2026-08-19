@@ -11,6 +11,15 @@ The tutorial solves steady incompressible channel/GDL flow followed by oxygen
 transport and a catalyst/membrane-potential closure.  It is a porous-medium
 screening model, not a two-phase or thermal PEMFC model.
 
+## Solver acknowledgements
+
+This solver was developed for the following project, if using please cite: Quentin Meyer, Ivan Pivac, Daniel Niblett, Md Raziun Bin Mamtaz, Frano Barbir, Chuan Zhao,
+Investigations of ultra-low air stoichiometries in hydrogen fuel cells via operando current and oxygen content cartography and multiphysics simulations,
+Electrochimica Acta, Volume 561, 2026, 148689, ISSN 0013-4686, https://doi.org/10.1016/j.electacta.2026.148689.
+
+This development was funded by Royal Society International Exchange (IES\R1\251476) for collaboration between Dr Daniel Niblett and Dr Quentin Meyer. It was also made possible by the EPSRC open fellowship ION-H2.
+
+
 ## Applications
 
 * `pemfcPorousFlowFoam` — steady resolved-channel and Darcy--Forchheimer GDL
