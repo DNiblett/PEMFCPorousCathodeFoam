@@ -50,7 +50,7 @@ Forchheimer sink:
 `permeability` is a `volSymmTensorField`.  Its tutorial value is diagonal,
 
 ```math
-\mathbf{K}=\operatorname{diag}(K_\parallel,K_\parallel,K_\perp).
+K_{xx}=K_{yy}=K_\parallel,\qquad K_{zz}=K_\perp,\qquad K_{ij}=0\quad(i\ne j).
 ```
 
 The isotropic value is calculated with Carman--Kozeny, then directional
