@@ -16,99 +16,82 @@ screening model, not a two-phase or thermal PEMFC model.
 * `pemfcPorousFlowFoam` — steady resolved-channel and Darcy--Forchheimer GDL
   flow.
 * `pemfcPorousCathodeFoam` — oxygen transport plus galvanostatic or
-  potentiostatic cathode closure, with directional effective O2 diffusivity.
+  potentiostatic cathode closure, with tensor O2 diffusivity.
 
 The names intentionally distinguish this narrow, single-phase PEMFC cathode
 workflow from the broader [openFuelCell2](https://github.com/openFuelCell2/openFuelCell2)
 multi-region fuel-cell/electrolyser toolbox.  They are descriptive application
 names rather than claims of a complete PEMFC model.
 
-`tau`, `tauInPlane`, and `tauThroughPlane` are guarded by the solver and must
-all be **at least 1**.  This tutorial therefore does not use the earlier
-effective fit with `tauInPlane=0.6`.
+The runners reject `tau`, `tauInPlane`, or `tauThroughPlane` below **1** and
+write the resulting `D_O2` tensor.  The solvers themselves consume the tensor
+directly, so alternative measured or fitted tensors can be supplied without a
+tortuosity model.
 
 ## Governing equations and conventions
 
 This section is the mathematical specification of the equations implemented
-in the two applications.  GitHub renders the displayed LaTex below natively.
+in the two applications.  Displayed equations use GitHub's explicit `math`
+fences, rather than renderer-dependent dollar delimiters.
 All quantities are SI unless a plot axis states otherwise.
 
 ### 1. Flow in the channel and porous medium
 
 The flow solver is steady, incompressible and single phase:
 
-$$
+```math
 \nabla \cdot \mathbf{U} = 0.
-$$
+```
 
 Its momentum equation is the OpenFOAM finite-volume form of convection,
-viscous stress, pressure, Darcy resistance and a scalar Forchheimer sink:
+viscous stress, pressure, tensor Darcy resistance and an optional scalar
+Forchheimer sink:
 
-$$
+```math
 \nabla\!\cdot(\mathbf{U}\otimes\mathbf{U})
 = -\nabla p + \nabla\!\cdot\boldsymbol{\tau}_{\mathrm{eff}}
 - \nu\mathbf{K}^{-1}\mathbf{U}
-- \frac{(1-\varepsilon)C_F}{\sqrt{K_\parallel}}
-  \lvert\mathbf{U}\rvert\mathbf{U}.
-$$
+- \beta_F\lvert\mathbf{U}\rvert\mathbf{U}.
+```
 
-The permeability tensor is diagonal in the tutorial coordinate system,
+`permeability` is a `volSymmTensorField`.  Its tutorial value is diagonal,
 
-$$
-\mathbf{K}=\operatorname{diag}(K_\parallel,K_\parallel,K_\perp),
-\qquad
-K=\frac{\varepsilon^3d_p^2}{150(1-\varepsilon)^2},
-\qquad
-C_F=\frac{1.75}{\sqrt{150\varepsilon^3}}.
-$$
+```math
+\mathbf{K}=\operatorname{diag}(K_\parallel,K_\parallel,K_\perp).
+```
 
-`K_parallel` is inserted implicitly in the momentum matrix; the difference
-between `K_perp` and `K_parallel` is added as an explicit z-direction
-correction.  At convergence this is exactly the tensor Darcy term above.
-The Forchheimer term deliberately uses `K_parallel`, since the channel-aligned
-velocity dominates its magnitude in this continuum model.
+One third of $\nu\,\mathrm{tr}(\mathbf{K}^{-1})$ is inserted implicitly and
+the remaining tensor action is explicit.  At convergence this is exactly the
+tensor Darcy term above, including off-diagonal components.  The optional
+$\beta_F$ is `forchheimerCoefficient` in `transportProperties` and defaults
+to zero.
 
 ### 2. Oxygen transport
 
 For oxygen concentration $C_{\mathrm{O_2}}$, the cathode solver solves the
 steady convection--diffusion equation
 
-$$
-\nabla\!\cdot\left(\varepsilon\,m\,\mathbf{U}C_{\mathrm{O_2}}\right)
-- \nabla\!\cdot\left(\mathbf{D}_{\mathrm{eff}}
+```math
+\nabla\!\cdot\left(\mathbf{U}C_{\mathrm{O_2}}\right)
+- \nabla\!\cdot\left(\mathbf{D}_{\mathrm{O_2}}
 \nabla C_{\mathrm{O_2}}\right)=0.
-$$
+```
 
-Here $m\in[0,1]$ is `speciesTransportMask`.  A face is transport-active
-only where both adjacent cells have $m\approx1$; cells with $m=0$ also
-receive a large diagonal anchoring coefficient.  Thus a fixed-grid topology
-wall is exactly impermeable to O2 transport rather than merely very resistive.
+`D_O2` is a `volSymmTensorField`.  For a face normal $\mathbf{n}$, the scalar
+coefficient used by the finite-volume Laplacian is its normal projection,
 
-For a face normal $\mathbf{n}$, the directional scalar face diffusivity is
+```math
+D_f=\mathbf{n}\cdot\mathbf{D}_{\mathrm{O_2},f}\cdot\mathbf{n}.
+```
 
-$$
-D_{\mathrm{eff},f}=m_f\left[
- D_\parallel(1-n_z^2)+D_\perp n_z^2\right],
-$$
-
-$$
-D_\parallel=
-\frac{D_{\mathrm{O_2}}\,\varepsilon\,m\,M_\parallel}{\tau_\parallel},
-\qquad
-D_\perp=
-\frac{D_{\mathrm{O_2}}\,\varepsilon\,m\,M_\perp}{\tau_\perp}.
-$$
-
-`oxygenDiffusivityMultiplier` and
-`oxygenDiffusivityThroughPlaneMultiplier` are $M_\parallel$ and
-$M_\perp$.  `tauInPlane` and `tauThroughPlane` are
-$\tau_\parallel$ and $\tau_\perp$, respectively.  The solver rejects
-any legacy or directional tortuosity below one.  At the catalyst boundary the
+The supplied runners construct the default diagonal tensor from
+`D_O2Free/tauInPlane` and `D_O2Free/tauThroughPlane`; this is a convenience,
+not an additional solver equation.  At the catalyst boundary the
 O2 consumption corresponds to the four-electron relation
 
-$$
+```math
 N_{\mathrm{O_2}}=-\frac{j}{4F},
-$$
+```
 
 implemented through the `codedMixed` boundary condition on `C_O2`.
 
@@ -116,60 +99,62 @@ implemented through the `codedMixed` boundary condition on `C_O2`.
 
 The local kinetic voltage includes an effective series contact loss,
 
-$$
+```math
 V_{\mathrm{kin}}=V_{\mathrm{cell}}-jR_{\mathrm{contact}}.
-$$
+```
 
 The default case uses Butler--Volmer cathode kinetics.  In the source's signed
 cathodic convention (`j_0c` is negative in the supplied dictionaries), the
 implemented expression is
 
-$$
+```math
 j = j_{0,c}M_k\frac{C_{\mathrm{O_2}}}{C_0}
 \exp\!\left(\frac{V_{\mathrm{kin}}-\phi_c-E_{0,c}}{B_{c,f}}\right)
 -j_{0,c}M_k
 \exp\!\left(\frac{V_{\mathrm{kin}}-\phi_c-E_{0,c}}{B_{c,b}}\right),
-$$
+```
 
-$$
+```math
 B_{c,f}=\frac{RT}{\alpha_cF},
 \qquad
 B_{c,b}=\frac{RT}{(1-\alpha_c)F}.
-$$
+```
 
-`kineticMultiplier` is $M_k$.  A Tafel alternative is also implemented:
+`kineticMultiplier` is $M_k$ and `contactResistance` is $R_{\rm contact}$;
+both are uniform entries in `transportProperties`.  A Tafel alternative is
+also implemented:
 
-$$
+```math
 j=j_{0,c}M_k\frac{C_{\mathrm{O_2}}}{C_0}
 \exp\!\left(\frac{V_{\mathrm{kin}}-\phi_c-E_{0,c}}{b_c}\right).
-$$
+```
 
 At each catalyst face the code applies Newton iterations to match the kinetic
 current to the membrane-side ohmic current:
 
-$$
+```math
 f(\phi_c)=j_{\mathrm{kin}}-
 \frac{k_m}{\delta_m}(\phi_c-\phi_a)=0.
-$$
+```
 
 The anode loss is updated from the area-averaged current density.  For the
 Butler--Volmer option it solves
 
-$$
+```math
 j_{0,a}\left[
 \exp\!\left(\frac{\eta_a}{B_{a,f}}\right)-
 \exp\!\left(\frac{\eta_a}{B_{a,b}}\right)
 \right]-\bar{j}=0,
 \qquad \phi_a=\phi_{a,s}-\eta_a.
-$$
+```
 
 The galvanostatic tutorial adjusts $V_{\mathrm{cell}}$ by Newton's method
 until the integrated catalyst current equals the requested current:
 
-$$
+```math
 \left|-\int_{\Gamma_{\mathrm{cat}}}j\,\mathrm{d}A-I_{\mathrm{target}}\right|
 <10^{-7}\ \mathrm{A}.
-$$
+```
 
 The alternative `operatingMode potentiostatic` fixes `VcellSetpoint` and
 iterates the integrated current instead.  To avoid modifying an already
@@ -188,8 +173,8 @@ effective boundary model, not a resolved catalyst-layer model.
 Both applications use OpenFOAM's segregated steady SIMPLE infrastructure.  The
 following is the actual execution sequence used by the tutorial scripts:
 
-1. Build the mesh (`blockMesh`, `snappyHexMesh`, `topoSet`, `createPatch`,
-   `setFields`) if it is absent.
+1. Build the mesh (`blockMesh`, `snappyHexMesh`, `topoSet`, `createPatch`) if
+   it is absent.
 2. Run `pemfcPorousFlowFoam` to converge $\mathbf{U}$, $p$, `phi`, and
    the porous resistance fields.
 3. Transfer the converged flow fields to the cathode solve and restore the
@@ -200,24 +185,26 @@ following is the actual execution sequence used by the tutorial scripts:
 5. Stop at the electrochemical current tolerance, archive the final field and
    post-process the requested current distribution or polarisation point.
 
-The serpentine driver deliberately uses `controlDict_flow` for the flow solve
-and `controlDict_tutorial_electrochem` for electrochemistry.  The latter is a
-finite safety cap; normal points stop earlier at the galvanostatic residual.
-The driver reads the reported converged cell voltage from the cathode log,
-rather than relying on the legacy `constant/Results` write state.
+Both tutorial drivers deliberately use `controlDict_flow` for the flow solve
+and `controlDict_tutorial_electrochem` for electrochemistry.  These use a
+finite SIMPLE-iteration cap and write every electrochemical iteration, so an
+early converged point still contains the `Flux` field required for plotting.
+Normal points stop earlier at their electrochemical residual.  The serpentine
+driver reads the reported converged cell voltage from the cathode log, rather
+than relying on the legacy `constant/Results` write state.
 
 ### Implementation map
 
 | Component | Source / input | Responsibility |
 | --- | --- | --- |
-| Flow executable | [`applications/pemfcPorousFlowFoam`](applications/pemfcPorousFlowFoam) | SIMPLE flow, Darcy--Forchheimer resistance, directional permeability. |
-| Momentum assembly | [`UEqn.H`](applications/pemfcPorousFlowFoam/UEqn.H) | Implements the momentum equation and anisotropic Darcy correction. |
-| Permeability fields | [`createFields.H`](applications/pemfcPorousFlowFoam/createFields.H) | Carman--Kozeny fallback and `K_parallel` / `K_perp` fields. |
+| Flow executable | [`applications/pemfcPorousFlowFoam`](applications/pemfcPorousFlowFoam) | SIMPLE flow, Darcy--Forchheimer resistance and permeability tensor. |
+| Momentum assembly | [`UEqn.H`](applications/pemfcPorousFlowFoam/UEqn.H) | Implements the full tensor Darcy action. |
+| Permeability input | [`createFields.H`](applications/pemfcPorousFlowFoam/createFields.H) | Reads `0/permeability` and scalar flow controls. |
 | Cathode executable | [`applications/pemfcPorousCathodeFoam`](applications/pemfcPorousCathodeFoam) | O2 transport, catalyst kinetics, anode/membrane closure and operating control. |
-| O2 assembly | [`CEqn.H`](applications/pemfcPorousCathodeFoam/CEqn.H) | Masked convection--diffusion and directional effective diffusivity. |
+| O2 assembly | [`CEqn.H`](applications/pemfcPorousCathodeFoam/CEqn.H) | Convection--diffusion with face-normal projection of `D_O2`. |
 | Kinetic/current closure | [`fiEqn.H`](applications/pemfcPorousCathodeFoam/fiEqn.H) | Butler--Volmer/Tafel update, catalyst Newton solve and galvanostatic voltage update. |
 | Anode update | [`updateAnodePotential.H`](applications/pemfcPorousCathodeFoam/updateAnodePotential.H) | Tafel or Butler--Volmer anode overpotential iteration. |
-| Guarded inputs | [`createFields.H`](applications/pemfcPorousCathodeFoam/createFields.H) | Validates $\tau\ge1$, reads masks and optional V2 multiplier fields. |
+| Tensor/scalar inputs | [`createFields.H`](applications/pemfcPorousCathodeFoam/createFields.H) | Reads `D_O2` and uniform kinetic/contact controls. |
 | Schneider workflow | [`scripts/run_schneider_validation.py`](scripts/run_schneider_validation.py) | Potentiostatic air/O2 sweep, VTK patch extraction and 19-segment plots. |
 | Serpentine workflow | [`scripts/run_serpentine_polarisation.py`](scripts/run_serpentine_polarisation.py) | Galvanostatic sweep, inlet stoichiometry, logs, CSV and polarisation plot. |
 
@@ -225,6 +212,12 @@ Case-specific physical values, boundary conditions and numerical tolerances are
 in `cases/<case>/constant/` and `cases/<case>/system/`.  In particular, inspect
 `transportProperties`, `speciesProperties`, `controlProperties`, `fvSchemes`
 and `fvSolution` before treating a tutorial result as a model prediction.
+
+Each case baseline (`0.template`, and the prepared `0`/`0.orig` directories)
+contains exactly six fields: `C_O2`, `D_O2`, `fi`, `p`, `permeability`, and
+`U`.  Spatial heterogeneity belongs in the two tensor fields; uniform inlet,
+kinetic, contact-resistance and Forchheimer controls belong in
+`constant/transportProperties`.
 
 ## Requirements
 
