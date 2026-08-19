@@ -1,5 +1,0 @@
-SOURCE = \
-fuelCellPorousFoam.C \
-species.C \
-
-# sources
