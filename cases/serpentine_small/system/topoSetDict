@@ -1,0 +1,51 @@
+FoamFile { version 2.0; format ascii; class dictionary; object topoSetDict; }
+actions
+(
+    {
+        name catalystFaces;
+        type faceSet;
+        action new;
+        source patchToFace;
+        patch fluid;
+    }
+    {
+        name catalystFaces;
+        type faceSet;
+        action subtract;
+        source normalToFace;
+        normal (1 0 0);
+        cos 0.01;
+    }
+    {
+        name catalystFaces;
+        type faceSet;
+        action subtract;
+        source normalToFace;
+        normal (-1 0 0);
+        cos 0.01;
+    }
+    {
+        name catalystFaces;
+        type faceSet;
+        action subtract;
+        source normalToFace;
+        normal (0 1 0);
+        cos 0.01;
+    }
+    {
+        name catalystFaces;
+        type faceSet;
+        action subtract;
+        source normalToFace;
+        normal (0 -1 0);
+        cos 0.01;
+    }
+    {
+        name catalystFaces;
+        type faceSet;
+        action subtract;
+        source normalToFace;
+        normal (0 0 1);
+        cos 0.01;
+    }
+);

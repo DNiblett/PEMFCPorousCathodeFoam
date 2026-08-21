@@ -1,0 +1,26 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+
+// A finite steady-state cap is essential for the segregated V2 catalyst solve.
+// The solver's current-control update is performed once per SIMPLE iteration.
+application     pemfcPorousCathodeFoam;
+startFrom       latestTime;
+startTime       latestTime;
+stopAt          endTime;
+endTime         200;
+deltaT          1;
+writeControl    timeStep;
+writeInterval   1;
+purgeWrite      0;
+writeFormat     ascii;
+writePrecision  8;
+writeCompression uncompressed;
+timeFormat      general;
+timePrecision   8;
+runTimeModifiable yes;
+adjustTimeStep  no;

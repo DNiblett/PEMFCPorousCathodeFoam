@@ -1,11 +1,21 @@
-# PEMFC porous-cathode OpenFOAM tutorial
+# pemfcPorousCathodeFoam
+This solver and cases is for a 3D resolved GDL and flowfield and a 0D model for membrane and anode. Catalyst layer is assumed thin, uniform current distribution. Concentration of oxygen solved using converged flow fields and conservation of current used with Newton iterations to solve potential and current distribution.
+
+To use:
+
+1. Install solver in applications/pemfcPorousFlowFoam which uses porosity field and permeability tensor
+2. Install solver in applications/pemfcPorousCathodeFoam which takes converged velocity field to solve
+3. Automated scripts made for validation and serpentine cases
+4. For manual use, use cases/serpentine_small then run or follow the sequence of commands in tutorial_run_list.sh
+
+# Automatic cases
 
 Two reproducible, single-phase PEM fuel-cell cathode examples for
 **OpenFOAM-v2512**:
 
 1. a Schneider et al. (2010) 19-segment single-channel current-distribution
-   comparison; and
-2. a 1 cm² serpentine-field galvanostatic polarisation curve.
+   comparison (run_schneider_validation.py)
+2. a 1 cm² serpentine-field galvanostatic polarisation curve (run_serpentine_polarisation.py)
 
 The tutorial solves steady incompressible channel/GDL flow followed by oxygen
 transport and a catalyst/membrane-potential closure.  It is a porous-medium
@@ -16,6 +26,8 @@ screening model, not a two-phase or thermal PEMFC model.
 This solver was developed for the following project, if using please cite: Quentin Meyer, Ivan Pivac, Daniel Niblett, Md Raziun Bin Mamtaz, Frano Barbir, Chuan Zhao,
 Investigations of ultra-low air stoichiometries in hydrogen fuel cells via operando current and oxygen content cartography and multiphysics simulations,
 Electrochimica Acta, Volume 561, 2026, 148689, ISSN 0013-4686, https://doi.org/10.1016/j.electacta.2026.148689.
+
+Potential and current control inspiration and case structure adopted from https://github.com/ancolli/bubbleCurrentDistributionFoam
 
 This development was funded by Royal Society International Exchange (IES\R1\251476) for collaboration between Dr Daniel Niblett and Dr Quentin Meyer. It was also made possible by the EPSRC open fellowship ION-H2.
 

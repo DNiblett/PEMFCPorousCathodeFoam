@@ -1,0 +1,111 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  3.0.1                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      C_O2;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 5.15;
+
+boundaryField
+{
+
+    ".*"
+    {
+        type            zeroGradient;
+    }
+    
+    "outlet"
+    {
+    type            zeroGradient;
+    }
+    
+    "inlet"
+    {
+    type fixedValue;
+    value uniform 5.15;
+    
+    //type            zeroGradient;
+    
+    }
+ 
+ catalyst
+    {
+
+    type            codedMixed;
+    
+    refValue        $internalField;
+    refGradient     uniform 0;
+    valueFraction   uniform 1;
+
+    name    cathode_reduction;   // name of generated BC
+
+    code
+    #{
+        const fvPatch& p = this->patch(); 
+    	label patchID = p.patch().boundaryMesh().findPatchID("catalyst");         
+        const fvMesh& mesh = patch().boundaryMesh().mesh();
+
+	const volSymmTensorField& diffusivity = this->db().objectRegistry::template lookupObject<volSymmTensorField>("D_O2");
+        const symmTensorField& diffusivityBoundary = diffusivity.boundaryField()[patchID];
+        const vectorField nHat = p.Sf()/mag(p.Sf());
+        scalarField Dnormal(diffusivityBoundary.size());
+        forAll(Dnormal, facei)
+        {
+            Dnormal[facei] = max(SMALL, nHat[facei] & (diffusivityBoundary[facei] & nHat[facei]));
+        }
+         
+            
+	const volScalarField& C_O2 = this->db().objectRegistry::template lookupObject<volScalarField>("C_O2");
+        scalarField C_O2_boundary = C_O2.boundaryField()[patchID]; 
+        const volScalarField& Flux = this->db().objectRegistry::template lookupObject<volScalarField>("Flux");
+        scalarField Flux_boundary = Flux.boundaryField()[patchID]; 
+        scalarField delta = 1.0/mesh.deltaCoeffs().boundaryField()[patchID]; 
+        
+	const scalar F = 96485;
+
+        scalarField j_1 = Flux_boundary;
+       
+     
+        scalarField a = (delta/(Dnormal*4*F)) * (j_1/C_O2_boundary);
+        scalarField b = j_1*0; //it is actually zero, but need field with same dimensions as ak
+        scalarField gradC1 = j_1/(4*Dnormal*F);
+        
+        this->refValue() = b/a; // 0 if production
+        this->refGrad() = gradC1*0; // this is zero if consumption
+        this->valueFraction() = a/(a+1); // 0 if production
+    
+        
+    #};   
+ 
+    codeInclude
+    #{
+        #include "fvCFD.H"
+        #include "fvcSnGrad.H"
+    #};
+
+    codeOptions
+    #{
+        -I$(LIB_SRC)/finiteVolume/lnInclude \
+            -I$(LIB_SRC)/meshTools/lnInclude
+    #};
+    
+    
+      }   
+
+}
+
+
+// ************************************************************************* //

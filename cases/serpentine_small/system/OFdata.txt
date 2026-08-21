@@ -1,0 +1,6 @@
+cellCrossArea 9.604e-5;
+Tgas 338;
+pGas 101325;
+yO2 0.21;
+stoichAir 1.5;
+inletArea 3.0e-7;
