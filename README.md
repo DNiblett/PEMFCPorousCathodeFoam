@@ -8,6 +8,12 @@ To use:
 3. Automated scripts made for validation and serpentine cases
 4. For manual use, use cases/serpentine_small then run or follow the sequence of commands in tutorial_run_list.sh
 
+# Example output
+
+<p align="center">
+  <img src="fuelCellExample.png" width="600">
+</p>
+
 # Automatic cases
 
 Two reproducible, single-phase PEM fuel-cell cathode examples for
